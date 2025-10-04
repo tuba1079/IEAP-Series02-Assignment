@@ -1,0 +1,296 @@
+---
+title: "Series 02 Assignment"
+output: html_document
+date: "2025-10-02"
+---
+# 1.1 The Problem
+The objective is to study whether the **nonuse of the proximal arm (PANU)** 
+is related to the **nonuse of the shoulder (SANU)** and **elbow (EENU)**.
+
+# 1.2 The Data
+We use the dataset `NonUse.csv` which contains 432 observations of 3 variables:
+- **PANU**: Proximal Arm Non Use  
+- **SANU**: Shoulder Antepulsion Non Use  
+- **EENU**: Elbow Extension Non Use  
+
+```{r}
+library(readr)
+
+# Load dataset
+nonuse <- read_csv("NonUse.csv")
+
+# Preview and describe dataset
+head(nonuse)              # first rows
+str(nonuse)               # structure
+summary(nonuse)           # summary stats
+colSums(is.na(nonuse))    # missing values
+```
+# 1.3 Correlation Analysis
+
+
+We now check whether PANU is related to SANU and EENU.
+
+```{r}
+# Correlation matrix (ignores missing values)
+cor(nonuse, use = "complete.obs")
+
+# Scatterplots
+plot(nonuse$SANU, nonuse$PANU,
+     xlab = "SANU (Shoulder Nonuse)",
+     ylab = "PANU (Proximal Arm Nonuse)",
+     main = "PANU vs SANU",
+     col = "blue", pch = 19)
+
+plot(nonuse$EENU, nonuse$PANU,
+     xlab = "EENU (Elbow Nonuse)",
+     ylab = "PANU (Proximal Arm Nonuse)",
+     main = "PANU vs EENU",
+     col = "red", pch = 19)
+```
+The correlation coefficients indicate a moderate positive relationship between PANU and both SANU and EENU. The scatterplots visually confirm these relationships, showing a trend where higher values of SANU and EENU are associated with higher values of PANU.```
+
+```{r}
+# 1.4 Linear Regression Analysis
+
+# Linear regression models
+model_sanu <- lm(PANU ~ SANU, data = nonuse)
+model_eenu <- lm(PANU ~ EENU, data = nonuse)
+
+# Show summaries
+summary(model_sanu)
+summary(model_eenu)
+```
+### 1.4 Results
+
+The regression analysis showed different relationships:
+
+- For **PANU ~ SANU**, the slope was very small (0.10) and the p-value (0.171) indicated that this relationship was **not statistically significant**. Thus, shoulder nonuse does not significantly predict proximal arm nonuse in this dataset.
+
+- For **PANU ~ EENU**, the slope was 0.40 and the intercept 5.67. The p-value (< 0.001) shows that this relationship is **highly significant**. The R² value (0.225) indicates that elbow nonuse explains about 22% of the variability in proximal arm nonuse, which is a moderate effect.
+
+### 1.5 Limitations
+- A large number of missing values reduced the sample size (over 200 missing for SANU and EENU).  
+- The models assume linearity and independence, which may not fully capture the clinical complexity of upper limb nonuse.  
+- Correlation and regression do not imply causation; further experimental designs are needed.
+
+
+##2 Statistical tests: comparison of medians (or means?) 
+
+## 2.1 Statistical Tests: Concepts
+
+- What is a median?
+  The median is the middle value of an ordered dataset, representing the point that divides the data into two equal halves.  
+  *Reference: https://statisticsbyjim.com/basics/median/*  
+
+- What is a mean?
+  The mean is the arithmetic average, obtained by summing all values and dividing by the number of observations.  
+  *Reference: https://www.britannica.com/science/arithmetic-mean*  
+
+- What is variance? Standard deviation?
+  Variance measures how far data points spread out from the mean; standard deviation is the square root of variance, in the same units as the data.  
+  *Reference: Montgomery & Runger, Applied Statistics and Probability for Engineers (book)*  
+
+- What is a normal distribution?
+  A bell-shaped, symmetric probability distribution where most values cluster around the mean.  
+  *Reference: https://www.investopedia.com/terms/n/normaldistribution.asp*  
+
+- What is a statistical test?
+  A method to determine if observed data significantly differs from what is expected under a null hypothesis.  
+  *Reference: https://www.itl.nist.gov/div898/handbook/prc/section1/prc111.htm*  
+
+- When to use a statistical test? 
+  When you want to decide whether observed differences or relationships are due to chance or represent real effects.  
+
+- What is a parametric test?
+  A test that assumes the data follow a certain distribution (e.g., t-test assumes normality).  
+
+- What is a non-parametric test? 
+  A test that does not assume normal distribution, useful for skewed or ordinal data (e.g., Wilcoxon, Mann-Whitney).  
+
+- Assumptions of parametric tests:
+  Normality, homogeneity of variances, independence.  
+
+- Assumptions of non-parametric tests:
+  Fewer assumptions; mainly independence and ordinal/ranked data.  
+
+- What is a p-value?
+  The probability of observing data at least as extreme as the current sample if the null hypothesis is true.  
+
+- Risk of error in statistical test? 
+  Type I error (false positive, rejecting a true null) and Type II error (false negative, failing to reject a false null).  
+
+- Difference between paired vs unpaired test? 
+  Paired: same subjects measured twice (before/after).  
+  Unpaired: two independent groups.  
+
+## 2.2: Effect of Treatment
+```{r}
+# Load dataset
+setwd("E:/IEAP/Python-R-Git/Series02-RStudio/IEAP-Series02-Assignment/")
+prepost <- read.csv("PrePost.csv")
+
+# Quick overview
+head(prepost)
+str(prepost)
+summary(prepost)
+
+```
+## 2.2.1 The Data
+
+The dataset `PrePost.csv` contains two variables:
+
+| Variable | Description | Unit | Possible values | Expected change |
+|----------|-------------|------|-----------------|-----------------|
+| perf     | Performance measure of cardiac patients (before/after rehab) | % (percentage) | 0–150% | Should increase |
+| time     | Measurement moment | Categorical (factor) | "pre", "post" | Compare before vs after |
+
+
+## 2.2.2 Data Visualization
+```{r} 
+install.packages("ggplot2", dependencies = TRUE, repos = "https://cloud.r-project.org/")
+
+```
+
+```{r}
+library(ggplot2)
+ggplot2::ggplot 
+
+prepost <- read.csv("PrePost.csv")
+
+library(ggplot2)
+
+ggplot(prepost, aes(x = time, y = perf, fill = time)) +
+  geom_boxplot() +
+  labs(title = "Performance Before and After Rehabilitation",
+       x = "Time",
+       y = "Performance (%)") +
+  theme_minimal()
+```
+
+The boxplot shows that the median performance after rehabilitation (post) is higher than before (pre), indicating an improvement. The spread of performance values also appears to be larger post-rehabilitation, suggesting increased variability in patient outcomes.
+## 2.2.3 Statistical Testing
+```{r}
+prepost <- read.csv("PrePost.csv", stringsAsFactors = FALSE)
+head(prepost)
+```
+```{r}
+names(prepost)
+```
+```{r}
+unique(prepost$time)
+```
+```{r}
+# Ensure 'perf' is numeric
+prepost$perf <- as.numeric(prepost$perf)
+
+# Convert 'time' to factor with correct order
+prepost$time <- factor(prepost$time, levels = c("Before", "After"))
+
+# Split into before and after
+before <- prepost$perf[prepost$time == "Before"]
+after  <- prepost$perf[prepost$time == "After"]
+
+# Compute difference
+diff_values <- after - before
+
+# 1️⃣ Check normality of the differences
+shapiro.test(diff_values)
+
+# 2️⃣ Perform paired t-test
+t_test <- t.test(after, before, paired = TRUE)
+t_test
+
+# 3️⃣ Perform non-parametric Wilcoxon signed-rank test
+wilcox_test <- wilcox.test(after, before, paired = TRUE)
+wilcox_test 
+```
+## 2.2.4 Results Interpretation
+
+Both the parametric (paired t-test) and non-parametric (Wilcoxon signed-rank) tests show a statistically significant difference in performance before and after rehabilitation.
+
+The paired t-test (t = 5.40, p = 0.001) indicates that the mean performance after rehabilitation was significantly higher than before. The Wilcoxon test (V = 36, p = 0.014) confirms this finding even without assuming normality.
+
+These results suggest that the rehabilitation treatment had a **positive and statistically significant effect** on patient performance, with average improvement of about 2.5 percentage points.
+
+```{r}
+library(ggplot2)
+ggplot(prepost, aes(x = time, y = perf, fill = time)) +
+  geom_boxplot() +
+  labs(title = "Performance Before and After Rehabilitation",
+       x = "Measurement Time", y = "Performance (%)") +
+  theme_minimal() +
+  scale_fill_manual(values = c("orange", "lightgreen"))
+```
+## 2.3 Testing Some Stereotypes
+
+The dataset `snore.txt` contains anthropometric and behavioral variables (one person per line).  
+We will explore possible relationships between snoring, weight, smoking, drinking, and gender.
+```{r}
+# Load dataset
+snore <- read.table("snore.txt", header = TRUE)
+
+# Preview the data
+head(snore)
+str(snore)
+summary(snore)
+
+
+```
+
+
+If `p < 0.05` → snorers are significantly heavier.
+
+# (a) Are snorers fatter? 
+```{r}
+boxplot(weight ~ snore, data = snore,
+        main = "Comparison of Weight between Snorers and Non-Snorers",
+        xlab = "Snoring Status", ylab = "Weight (kg)", col = c("lightblue", "orange"))
+
+t_test_weight <- t.test(weight ~ snore, data = snore)
+t_test_weight
+```
+The independent t-test shows that there is no significant difference in body weight between snorers and non-snorers (t = 0.05, p = 0.96).
+On average, both groups have almost the same mean weight (around 90 kg).
+Therefore, the stereotype that “snorers are fatter” is not supported by the data.
+# (b) Do snorers drink or smoke more?
+```{r}
+
+# Cross-tabulation
+table(snore$snore, snore$alcool)   # "alcool" = drinking frequency
+table(snore$snore, snore$tabac)    # "tabac" = smoking habit
+
+# Chi-square tests for association
+chisq.test(table(snore$snore, snore$alcool))
+chisq.test(table(snore$snore, snore$tabac))
+
+```
+The Chi-Square analyses did not reveal any significant association between snoring and lifestyle behaviors such as alcohol consumption or smoking (p > 0.05 for both).
+This suggests that, within the studied group, snoring is not significantly influenced by either drinking or smoking habits.
+# Do women smoke less?
+
+We test if smoking behavior is associated with gender using a Chi-square test (because both are categorical).
+```{r}
+table(snore$sex, snore$tabac)  # "sex" = women
+chisq.test(table(snore$sex, snore$tabac))
+
+```
+The results indicated a statistically significant association between gender and smoking status (χ² = 7.00, df = 1, p = 0.008).  
+This suggests that women tend to smoke less frequently than men in this dataset.
+
+### (d) Correlations Between Quantitative Variables
+```{r}
+# Select only numeric variables
+numeric_data <- snore[, sapply(snore, is.numeric)]
+
+# View correlation matrix
+cor_matrix <- cor(numeric_data, use = "complete.obs", method = "pearson")
+cor_matrix
+
+# Optional: visualize with a heatmap
+library(corrplot)
+corrplot(cor_matrix, method = "color", type = "upper", 
+         tl.col = "black", tl.srt = 45, addCoef.col = "black",
+         title = "Correlation Matrix of Quantitative Variables",
+         mar = c(0,0,2,0))
+```
+The correlation analysis shows a very strong positive relationship between weight and height (r = 0.93), indicating that taller participants tend to weigh more. Other relationships, such as between age, weight, and alcohol consumption, appear weak or negligible (|r| < 0.2), suggesting no significant linear association among these variables.
